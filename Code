@@ -1,0 +1,772 @@
+<!-- Schedule Controls -->
+        <div class="bg-gray-50 p-4 border-b flex justify-center items-center gap-4">
+            <div class="flex items-center space-x-2">
+                <button id="prev-day" class="px-3 py-1 bg-white border border-gray-300 rounded-md hover:bg-gray-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button id="today" class="px-4 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors min-w-[90px]">
+                    <span id="center-button-text">Today</span>
+                </button>
+                <button id="next-day" class="px-3 py-1 bg-white border border-gray-300 rounded-md hover:bg-gray-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Past day warning -->
+        <div id="past-day-warning" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 text-amber-700">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm">You are viewing a past day. Tasks can only be viewed or deleted, not edited.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Schedule Content -->
+        <div class="p-6">
+            <div id="schedule-container" class="space-y-3">
+                <!-- Time slots will be generated here -->
+            </div>
+            
+            <!-- Empty state -->
+            <div id="empty-state" class="hidden text-center py-12">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-500">No tasks scheduled</h3>
+                <p class="mt-1 text-gray-400">Add tasks to your schedule using the + button</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button (FAB) -->
+<div id="add-task-fab" class="fab">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+    </svg>
+</div>
+
+<!-- Add Task Modal -->
+<div id="task-modal" class="modal-overlay">
+    <div class="modal p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Add New Task</h3>
+            <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label for="task-name" class="block text-sm font-medium text-gray-700 mb-1">Task Name</label>
+                <input type="text" id="task-name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter task name">
+            </div>
+            
+            <div class="time-input-group">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                    <div id="start-time-display" class="time-display">
+                        <span id="start-time-text" class="time-display-text">Select time</span>
+                        <span class="time-display-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </span>
+                    </div>
+                    <input type="hidden" id="start-time-value">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                    <div id="end-time-display" class="time-display">
+                        <span id="end-time-text" class="time-display-text">Select time</span>
+                        <span class="time-display-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </span>
+                    </div>
+                    <input type="hidden" id="end-time-value">
+                </div>
+            </div>
+            
+            <div class="pt-2">
+                <button id="add-task-btn" class="w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                    Add Task
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Time Picker Overlay -->
+<div id="time-picker-overlay" class="time-picker-overlay">
+    <div class="time-picker">
+        <div class="time-picker-header">
+            <span id="time-picker-title">Select Time</span>
+        </div>
+        
+        <div class="time-picker-selectors">
+            <!-- Hour Column -->
+            <div class="time-column">
+                <div class="selection-indicator"></div>
+                <div id="hour-column" class="time-column-inner">
+                    <!-- Hours will be populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Minute Column -->
+            <div class="time-column">
+                <div class="selection-indicator"></div>
+                <div id="minute-column" class="time-column-inner">
+                    <!-- Minutes will be populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Period Column -->
+            <div class="time-column">
+                <div class="selection-indicator"></div>
+                <div id="period-column" class="time-column-inner">
+                    <div class="time-option" data-value="AM">AM</div>
+                    <div class="time-option" data-value="PM">PM</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="time-picker-actions">
+            <button id="time-picker-cancel" class="time-picker-btn time-picker-cancel">Cancel</button>
+            <button id="time-picker-confirm" class="time-picker-btn time-picker-confirm">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize variables
+        let currentDate = new Date();
+        let scheduleData = JSON.parse(localStorage.getItem('scheduleData')) || {};
+        let currentTimePickerTarget = null; // To track which time field is being edited
+        let selectedHour = 12;
+        let selectedMinute = 0;
+        let selectedPeriod = 'AM';
+        
+        // DOM elements
+        const currentDateEl = document.getElementById('current-date');
+        const currentDayEl = document.getElementById('current-day');
+        const scheduleContainer = document.getElementById('schedule-container');
+        const emptyState = document.getElementById('empty-state');
+        const prevDayBtn = document.getElementById('prev-day');
+        const nextDayBtn = document.getElementById('next-day');
+        const todayBtn = document.getElementById('today');
+        const centerButtonText = document.getElementById('center-button-text');
+        const pastDayWarning = document.getElementById('past-day-warning');
+        const addTaskFab = document.getElementById('add-task-fab');
+        const taskModal = document.getElementById('task-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const taskNameInput = document.getElementById('task-name');
+        const startTimeDisplay = document.getElementById('start-time-display');
+        const startTimeText = document.getElementById('start-time-text');
+        const startTimeValue = document.getElementById('start-time-value');
+        const endTimeDisplay = document.getElementById('end-time-display');
+        const endTimeText = document.getElementById('end-time-text');
+        const endTimeValue = document.getElementById('end-time-value');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const timePickerOverlay = document.getElementById('time-picker-overlay');
+        const timePickerTitle = document.getElementById('time-picker-title');
+        const hourColumn = document.getElementById('hour-column');
+        const minuteColumn = document.getElementById('minute-column');
+        const periodColumn = document.getElementById('period-column');
+        const timePickerCancel = document.getElementById('time-picker-cancel');
+        const timePickerConfirm = document.getElementById('time-picker-confirm');
+        
+        // Format date as YYYY-MM-DD
+        function formatDate(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+        
+        // Format date for display
+        function formatDisplayDate(date) {
+            return date.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+        }
+        
+        // Format day for display
+        function formatDisplayDay(date) {
+            return date.toLocaleDateString('en-US', { weekday: 'long' });
+        }
+        
+        // Check if a date is in the past (before today)
+        function isDateInPast(date) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const compareDate = new Date(date);
+            compareDate.setHours(0, 0, 0, 0);
+            return compareDate < today;
+        }
+        
+        // Check if current view date is today
+        function isViewingToday() {
+            const today = new Date();
+            return currentDate.getDate() === today.getDate() && 
+                   currentDate.getMonth() === today.getMonth() && 
+                   currentDate.getFullYear() === today.getFullYear();
+        }
+        
+        // Update the date display
+        function updateDateDisplay() {
+            currentDateEl.textContent = formatDisplayDate(currentDate);
+            currentDayEl.textContent = formatDisplayDay(currentDate);
+            updateCenterButton();
+            checkPastDay();
+        }
+        
+        // Update center button text
+        function updateCenterButton() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            // Compare dates without time
+            const currentWithoutTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+            const todayWithoutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const tomorrowWithoutTime = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+            const yesterdayWithoutTime = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+            
+            if (currentWithoutTime.getTime() === todayWithoutTime.getTime()) {
+                centerButtonText.textContent = "Today";
+            } else if (currentWithoutTime.getTime() === tomorrowWithoutTime.getTime()) {
+                centerButtonText.textContent = "Tomorrow";
+            } else if (currentWithoutTime.getTime() === yesterdayWithoutTime.getTime()) {
+                centerButtonText.textContent = "Yesterday";
+            } else {
+                centerButtonText.textContent = currentDate.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric'
+                });
+            }
+        }
+        
+        // Check if viewing a past day and update UI accordingly
+        function checkPastDay() {
+            const isPastDay = isDateInPast(currentDate);
+            
+            if (isPastDay) {
+                pastDayWarning.classList.remove('hidden');
+                addTaskFab.classList.add('hidden');
+            } else {
+                pastDayWarning.classList.add('hidden');
+                addTaskFab.classList.remove('hidden');
+            }
+        }
+        
+        // Initialize time picker
+        function initTimePicker() {
+            // Populate hours (1-12)
+            hourColumn.innerHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                const hourOption = document.createElement('div');
+                hourOption.className = 'time-option';
+                hourOption.dataset.value = i;
+                hourOption.textContent = i;
+                hourColumn.appendChild(hourOption);
+            }
+            
+            // Populate minutes (00-59)
+            minuteColumn.innerHTML = '';
+            for (let i = 0; i < 60; i++) {
+                const minuteOption = document.createElement('div');
+                minuteOption.className = 'time-option';
+                minuteOption.dataset.value = i;
+                minuteOption.textContent = String(i).padStart(2, '0');
+                minuteColumn.appendChild(minuteOption);
+            }
+            
+            // Add event listeners to time options
+            document.querySelectorAll('.time-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const column = this.parentElement;
+                    const value = this.dataset.value;
+                    
+                    // Update selected value based on column
+                    if (column.id === 'hour-column') {
+                        selectedHour = parseInt(value);
+                    } else if (column.id === 'minute-column') {
+                        selectedMinute = parseInt(value);
+                    } else if (column.id === 'period-column') {
+                        selectedPeriod = value;
+                    }
+                    
+                    // Update UI
+                    updateTimePickerSelection();
+                });
+            });
+            
+            // Add scroll event listeners to center the selected option
+            [hourColumn, minuteColumn, periodColumn].forEach(column => {
+                column.addEventListener('scroll', function() {
+                    const options = this.querySelectorAll('.time-option');
+                    const columnRect = this.getBoundingClientRect();
+                    const centerY = columnRect.top + columnRect.height / 2;
+                    
+                    let closestOption = null;
+                    let closestDistance = Infinity;
+                    
+                    options.forEach(option => {
+                        const optionRect = option.getBoundingClientRect();
+                        const optionCenterY = optionRect.top + optionRect.height / 2;
+                        const distance = Math.abs(optionCenterY - centerY);
+                        
+                        if (distance < closestDistance) {
+                            closestDistance = distance;
+                            closestOption = option;
+                        }
+                    });
+                    
+                    if (closestOption) {
+                        // Remove selected class from all options in this column
+                        options.forEach(opt => opt.classList.remove('selected'));
+                        
+                        // Add selected class to closest option
+                        closestOption.classList.add('selected');
+                        
+                        // Update selected value based on column
+                        const value = closestOption.dataset.value;
+                        if (this.id === 'hour-column') {
+                            selectedHour = parseInt(value);
+                        } else if (this.id === 'minute-column') {
+                            selectedMinute = parseInt(value);
+                        } else if (this.id === 'period-column') {
+                            selectedPeriod = value;
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Update time picker selection
+        function updateTimePickerSelection() {
+            // Update hour selection
+            const hourOptions = hourColumn.querySelectorAll('.time-option');
+            hourOptions.forEach(option => {
+                option.classList.remove('selected');
+                if (parseInt(option.dataset.value) === selectedHour) {
+                    option.classList.add('selected');
+                    scrollToCenter(hourColumn, option);
+                }
+            });
+            
+            // Update minute selection
+            const minuteOptions = minuteColumn.querySelectorAll('.time-option');
+            minuteOptions.forEach(option => {
+                option.classList.remove('selected');
+                if (parseInt(option.dataset.value) === selectedMinute) {
+                    option.classList.add('selected');
+                    scrollToCenter(minuteColumn, option);
+                }
+            });
+            
+            // Update period selection
+            const periodOptions = periodColumn.querySelectorAll('.time-option');
+            periodOptions.forEach(option => {
+                option.classList.remove('selected');
+                if (option.dataset.value === selectedPeriod) {
+                    option.classList.add('selected');
+                    scrollToCenter(periodColumn, option);
+                }
+            });
+        }
+        
+        // Scroll to center an element in its container
+        function scrollToCenter(container, element) {
+            const containerRect = container.getBoundingClientRect();
+            const elementRect = element.getBoundingClientRect();
+            
+            const containerHeight = containerRect.height;
+            const elementHeight = elementRect.height;
+            
+            const scrollTop = element.offsetTop - (containerHeight / 2) + (elementHeight / 2);
+            
+            container.scrollTop = scrollTop;
+        }
+        
+        // Open time picker
+        function openTimePicker(target) {
+            currentTimePickerTarget = target;
+            
+            // Set title based on target
+            timePickerTitle.textContent = target === 'start' ? 'Select Start Time' : 'Select End Time';
+            
+            // Parse current value if exists
+            if (target === 'start' && startTimeValue.value) {
+                parseTimeValue(startTimeValue.value);
+            } else if (target === 'end' && endTimeValue.value) {
+                parseTimeValue(endTimeValue.value);
+            } else {
+                // Default to current time rounded to nearest 5 minutes
+                const now = new Date();
+                selectedHour = now.getHours() % 12 || 12;
+                selectedMinute = Math.round(now.getMinutes() / 5) * 5;
+                if (selectedMinute === 60) {
+                    selectedMinute = 0;
+                    selectedHour = (selectedHour % 12) + 1;
+                }
+                selectedPeriod = now.getHours() < 12 ? 'AM' : 'PM';
+            }
+            
+            // Update selection
+            updateTimePickerSelection();
+            
+            // Show overlay
+            timePickerOverlay.classList.add('active');
+        }
+        
+        // Close time picker
+        function closeTimePicker() {
+            timePickerOverlay.classList.remove('active');
+            currentTimePickerTarget = null;
+        }
+        
+        // Parse time value (HH:MM format) to set selected values
+        function parseTimeValue(timeValue) {
+            const [hours, minutes] = timeValue.split(':').map(Number);
+            selectedHour = hours % 12 || 12;
+            selectedMinute = minutes;
+            selectedPeriod = hours < 12 ? 'AM' : 'PM';
+        }
+        
+        // Format time for display
+        function formatTimeForDisplay(hour, minute, period) {
+            return `${hour}:${String(minute).padStart(2, '0')} ${period}`;
+        }
+        
+        // Format time for value (24-hour format)
+        function formatTimeForValue(hour, minute, period) {
+            let hours24 = hour;
+            if (period === 'PM' && hour !== 12) {
+                hours24 += 12;
+            } else if (period === 'AM' && hour === 12) {
+                hours24 = 0;
+            }
+            return `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+        }
+        
+        // Confirm time selection
+        function confirmTimeSelection() {
+            const displayTime = formatTimeForDisplay(selectedHour, selectedMinute, selectedPeriod);
+            const valueTime = formatTimeForValue(selectedHour, selectedMinute, selectedPeriod);
+            
+            if (currentTimePickerTarget === 'start') {
+                startTimeText.textContent = displayTime;
+                startTimeValue.value = valueTime;
+            } else if (currentTimePickerTarget === 'end') {
+                endTimeText.textContent = displayTime;
+                endTimeValue.value = valueTime;
+            }
+            
+            closeTimePicker();
+        }
+        
+        // Format time for display (convert 24h to 12h format)
+        function formatDisplayTime(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            const period = hours < 12 ? 'AM' : 'PM';
+            const displayHours = hours % 12 || 12;
+            return `${displayHours}:${String(minutes).padStart(2, '0')} ${period}`;
+        }
+        
+        // Generate time slots
+        function generateTimeSlots() {
+            scheduleContainer.innerHTML = '';
+            
+            const dateKey = formatDate(currentDate);
+            const daySchedule = scheduleData[dateKey] || {};
+            
+            // Check if schedule is empty
+            if (Object.keys(daySchedule).length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            // Sort times
+            const sortedTimes = Object.keys(daySchedule).sort();
+            
+            // Create time slots
+            sortedTimes.forEach(timeKey => {
+                const tasks = daySchedule[timeKey];
+                const [startTime, endTime] = timeKey.split('-');
+                const displayStartTime = formatDisplayTime(startTime);
+                const displayEndTime = formatDisplayTime(endTime);
+                
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot bg-white border border-gray-200 rounded-lg p-4 shadow-sm';
+                
+                const timeHeader = document.createElement('div');
+                timeHeader.className = 'flex items-center mb-3';
+                timeHeader.innerHTML = `
+                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex flex-col items-center justify-center mr-4">
+                        <span class="text-indigo-800 font-semibold text-sm">${displayStartTime}</span>
+                        <span class="text-indigo-600 text-xs">to</span>
+                        <span class="text-indigo-800 font-semibold text-sm">${displayEndTime}</span>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-800">Tasks</h3>
+                `;
+                
+                const taskList = document.createElement('div');
+                taskList.className = 'ml-20 space-y-2';
+                
+                // Check if this time slot is in the past
+                const now = new Date();
+                const [startHour, startMinute] = startTime.split(':').map(Number);
+                const timeDate = new Date(currentDate);
+                timeDate.setHours(startHour, startMinute, 0, 0);
+                const isPastTimeSlot = timeDate < now;
+                
+                if (isPastTimeSlot) {
+                    timeSlot.classList.add('past-task');
+                }
+                
+                tasks.forEach((task, index) => {
+                    const taskItem = document.createElement('div');
+                    taskItem.className = 'task-item flex items-center justify-between p-2 border-b border-gray-100';
+                    
+                    // For past tasks, we don't allow editing (checking/unchecking)
+                    if (isPastTimeSlot) {
+                        taskItem.innerHTML = `
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 mr-3 border border-gray-300 rounded ${task.completed ? 'bg-indigo-600' : ''}"></div>
+                                <span class="task-text ${task.completed ? 'line-through text-gray-400' : ''}">${task.text}</span>
+                            </div>
+                            <button class="delete-task text-gray-400 hover:text-red-500" data-time="${timeKey}" data-index="${index}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        `;
+                    } else {
+                        taskItem.innerHTML = `
+                            <div class="flex items-center">
+                                <input type="checkbox" class="task-checkbox w-4 h-4 mr-3 accent-indigo-600" data-time="${timeKey}" data-index="${index}" ${task.completed ? 'checked' : ''}>
+                                <span class="task-text ${task.completed ? 'line-through text-gray-400' : ''}">${task.text}</span>
+                            </div>
+                            <button class="delete-task text-gray-400 hover:text-red-500" data-time="${timeKey}" data-index="${index}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        `;
+                    }
+                    
+                    taskList.appendChild(taskItem);
+                });
+                
+                timeSlot.appendChild(timeHeader);
+                timeSlot.appendChild(taskList);
+                scheduleContainer.appendChild(timeSlot);
+            });
+            
+            // Add event listeners to checkboxes and delete buttons
+            document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', toggleTaskCompletion);
+            });
+            
+            document.querySelectorAll('.delete-task').forEach(button => {
+                button.addEventListener('click', deleteTask);
+            });
+        }
+        
+        // Add a new task
+        function addTask() {
+            const taskText = taskNameInput.value.trim();
+            const startTime = startTimeValue.value;
+            const endTime = endTimeValue.value;
+            
+            if (!taskText) {
+                alert('Please enter a task name');
+                return;
+            }
+            
+            if (!startTime) {
+                alert('Please select a start time');
+                return;
+            }
+            
+            if (!endTime) {
+                alert('Please select an end time');
+                return;
+            }
+            
+            // Validate end time is after start time
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+            
+            if (endHour < startHour || (endHour === startHour && endMinute <= startMinute)) {
+                alert('End time must be after start time');
+                return;
+            }
+            
+            const dateKey = formatDate(currentDate);
+            
+            // Initialize if needed
+            if (!scheduleData[dateKey]) {
+                scheduleData[dateKey] = {};
+            }
+            
+            const timeKey = `${startTime}-${endTime}`;
+            
+            if (!scheduleData[dateKey][timeKey]) {
+                scheduleData[dateKey][timeKey] = [];
+            }
+            
+            // Add the new task
+            scheduleData[dateKey][timeKey].push({
+                text: taskText,
+                completed: false
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+            
+            // Clear inputs and close modal
+            taskNameInput.value = '';
+            startTimeText.textContent = 'Select time';
+            startTimeValue.value = '';
+            endTimeText.textContent = 'Select time';
+            endTimeValue.value = '';
+            closeModal();
+            
+            // Refresh the display
+            generateTimeSlots();
+        }
+        
+        // Toggle task completion
+        function toggleTaskCompletion(e) {
+            const timeKey = e.target.dataset.time;
+            const index = e.target.dataset.index;
+            const dateKey = formatDate(currentDate);
+            
+            scheduleData[dateKey][timeKey][index].completed = e.target.checked;
+            
+            // Update task text style
+            const taskText = e.target.parentElement.querySelector('.task-text');
+            if (e.target.checked) {
+                taskText.classList.add('line-through', 'text-gray-400');
+            } else {
+                taskText.classList.remove('line-through', 'text-gray-400');
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+        }
+        
+        // Delete a task
+        function deleteTask(e) {
+            const button = e.target.closest('.delete-task');
+            const timeKey = button.dataset.time;
+            const index = button.dataset.index;
+            const dateKey = formatDate(currentDate);
+            
+            // Remove the task
+            scheduleData[dateKey][timeKey].splice(index, 1);
+            
+            // Remove the time slot if no tasks remain
+            if (scheduleData[dateKey][timeKey].length === 0) {
+                delete scheduleData[dateKey][timeKey];
+            }
+            
+            // Remove the day if no time slots remain
+            if (Object.keys(scheduleData[dateKey]).length === 0) {
+                delete scheduleData[dateKey];
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+            
+            // Refresh the display
+            generateTimeSlots();
+        }
+        
+        // Navigate to previous day
+        function goToPrevDay() {
+            currentDate.setDate(currentDate.getDate() - 1);
+            updateDateDisplay();
+            generateTimeSlots();
+        }
+        
+        // Navigate to next day
+        function goToNextDay() {
+            currentDate.setDate(currentDate.getDate() + 1);
+            updateDateDisplay();
+            generateTimeSlots();
+        }
+        
+        // Navigate to today
+        function goToToday() {
+            currentDate = new Date();
+            updateDateDisplay();
+            generateTimeSlots();
+        }
+        
+        // Open modal
+        function openModal() {
+            taskModal.classList.add('active');
+            taskNameInput.focus();
+        }
+        
+        // Close modal
+        function closeModal() {
+            taskModal.classList.remove('active');
+        }
+        
+        // Initialize the app
+        initTimePicker();
+        updateDateDisplay();
+        generateTimeSlots();
+        
+        // Event listeners
+        addTaskBtn.addEventListener('click', addTask);
+        prevDayBtn.addEventListener('click', goToPrevDay);
+        nextDayBtn.addEventListener('click', goToNextDay);
+        todayBtn.addEventListener('click', goToToday);
+        addTaskFab.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        
+        // Time picker events
+        startTimeDisplay.addEventListener('click', () => openTimePicker('start'));
+        endTimeDisplay.addEventListener('click', () => openTimePicker('end'));
+        timePickerCancel.addEventListener('click', closeTimePicker);
+        timePickerConfirm.addEventListener('click', confirmTimeSelection);
+        
+        // Close modal when clicking outside
+        taskModal.addEventListener('click', function(e) {
+            if (e.target === taskModal) {
+                closeModal();
+            }
+        });
+        
+        // Allow adding task with Enter key
+        taskNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !isDateInPast(currentDate)) {
+                addTask();
+            }
+        });
+    });
+</script>
